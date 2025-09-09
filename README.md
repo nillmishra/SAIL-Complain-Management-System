@@ -7,6 +7,5 @@
 4) Check http://localhost:3000/api/health → {"ok": true}
 
 ## Notes
-- Default admin (seeded on first run): admin / password123
 - Update CORS in `server.js` for production.
 - Deploy to Render/Railway/EC2 and set environment variables in the service."# SAIL-Complain-Management-System" 
