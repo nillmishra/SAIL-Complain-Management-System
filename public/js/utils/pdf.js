@@ -14,13 +14,22 @@ export function downloadComplaintsPdf(list) {
   doc.setFontSize(14);
   doc.text("SAIL Complaint Management System - Complaints Report", 14, 16);
 
+  // Complaint Details removed
   const headers = [
     "Complaint ID","Max Number","Department","Issue Type",
-    "Complaint Details","Location","Contact Number","Status","Progress","Last Updated"
+    "Location","Contact Number","Status","Progress","Registered On","Last Updated"
   ];
   const rows = list.map(c => [
-    c.id, c.maxNumber, c.department, c.issueType, c.complaintText,
-    c.location, c.contactNumber, c.status, c.progressText || "", formatTimestamp(c.updatedAt)
+    c.id,
+    c.maxNumber,
+    c.department,
+    c.issueType,
+    c.location,
+    c.contactNumber,
+    c.status,
+    c.progressText || "",
+    formatTimestamp(c.createdAt),
+    formatTimestamp(c.updatedAt)
   ]);
 
   doc.autoTable({
@@ -32,10 +41,16 @@ export function downloadComplaintsPdf(list) {
     margin: { left: 8, right: 8 },
     theme: 'grid',
     columnStyles: {
-      0: { cellWidth: 28 }, 1: { cellWidth: 22 }, 2: { cellWidth: 32 },
-      3: { cellWidth: 32 }, 4: { cellWidth: 50 }, 5: { cellWidth: 32 },
-      6: { cellWidth: 32 }, 7: { cellWidth: 28 }, 8: { cellWidth: 50 },
-      9: { cellWidth: 38 }
+      0: { cellWidth: 28 }, // Complaint ID
+      1: { cellWidth: 22 }, // Max Number
+      2: { cellWidth: 32 }, // Department
+      3: { cellWidth: 32 }, // Issue Type
+      4: { cellWidth: 36 }, // Location
+      5: { cellWidth: 30 }, // Contact
+      6: { cellWidth: 26 }, // Status
+      7: { cellWidth: 48 }, // Progress
+      8: { cellWidth: 34 }, // Registered On
+      9: { cellWidth: 38 }  // Last Updated
     }
   });
 

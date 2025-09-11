@@ -20,13 +20,12 @@ if (!JWT_SECRET) {
   process.exit(1);
 }
 
-// Schemas
+// Schemas (complaintText removed)
 const ComplaintSchema = new mongoose.Schema({
   id: { type: String, unique: true, index: true },
   maxNumber: { type: String, required: true },
   department: { type: String, required: true },
   issueType: { type: String, required: true },
-  complaintText: { type: String, required: true },
   location: { type: String, required: true },
   contactNumber: { type: String, required: true },
   status: { type: String, default: 'Registered' },
@@ -72,20 +71,22 @@ async function ensureDefaultAdmin() {
   }
 }
 
-// API routes (same as before)
+// API
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 
-// Create complaint (public)
+// Create complaint (complaintText removed)
 app.post('/api/complaints', async (req, res) => {
   try {
-    const { id, maxNumber, department, issueType, complaintText, location, contactNumber } = req.body;
+    const { id, maxNumber, department, issueType, location, contactNumber } = req.body;
 
     if (!/^[78]\d{4}$/.test(maxNumber)) return res.status(400).json({ message: 'Invalid max number' });
-    if (!department || !issueType || !complaintText || !location) return res.status(400).json({ message: 'Missing fields' });
+    if (!department || !issueType || !location) return res.status(400).json({ message: 'Missing fields' });
     if (!/^\d{10}$/.test(contactNumber)) return res.status(400).json({ message: 'Invalid contact number' });
     if (!id) return res.status(400).json({ message: 'Missing complaint ID' });
 
-    const complaint = await Complaint.create({ id, maxNumber, department, issueType, complaintText, location, contactNumber });
+    const complaint = await Complaint.create({
+      id, maxNumber, department, issueType, location, contactNumber
+    });
     res.status(201).json(complaint);
   } catch (e) {
     if (e && e.code === 11000) {
@@ -96,20 +97,20 @@ app.post('/api/complaints', async (req, res) => {
   }
 });
 
-// Get complaint by ID (public)
+// Get by ID
 app.get('/api/complaints/:id', async (req, res) => {
   const c = await Complaint.findOne({ id: req.params.id }).lean();
   if (!c) return res.status(404).json({ message: 'Not found' });
   res.json(c);
 });
 
-// List all complaints (admin)
+// List all (admin)
 app.get('/api/complaints', authAdmin, async (req, res) => {
   const list = await Complaint.find().sort({ createdAt: -1 }).lean();
   res.json(list);
 });
 
-// Update complaint (admin) — updates status + progressText
+// Update (admin) — status + progressText
 app.patch('/api/complaints/:id', authAdmin, async (req, res) => {
   try {
     const allowedStatuses = ['Registered', 'In Progress', 'Resolved', 'Closed'];
@@ -143,7 +144,7 @@ app.patch('/api/complaints/:id', authAdmin, async (req, res) => {
   }
 });
 
-// Delete complaint (admin)
+// Delete (admin)
 app.delete('/api/complaints/:id', authAdmin, async (req, res) => {
   const out = await Complaint.findOneAndDelete({ id: req.params.id }).lean();
   if (!out) return res.status(404).json({ message: 'Not found' });
@@ -162,19 +163,8 @@ app.post('/api/admin/login', async (req, res) => {
   res.json({ token });
 });
 
-// Generate admin creds (admin-only)
-app.post('/api/admin/generate', authAdmin, async (req, res) => {
-  const username = 'admin_' + randomString(4);
-  const plainPassword = randomString(8);
-  const passwordHash = await bcrypt.hash(plainPassword, 10);
-  await Admin.create({ username, passwordHash });
-  res.json({ username, password: plainPassword });
-});
-
-// Serve the frontend (same origin -> no CORS needed)
+// Serve frontend (same-origin)
 app.use(express.static(path.join(__dirname, 'public')));
-
-// SPA fallback for any non-API route
 app.get(/^(?!\/api).*/, (_req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });

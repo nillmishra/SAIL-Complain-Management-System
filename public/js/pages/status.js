@@ -30,7 +30,6 @@ export function loadCheckStatus() {
         <p><strong>Max Number:</strong> ${c.maxNumber}</p>
         <p><strong>Department:</strong> ${c.department}</p>
         <p><strong>Issue Type:</strong> ${c.issueType}</p>
-        <p><strong>Complaint Details:</strong> ${c.complaintText}</p>
         <p><strong>Location:</strong> ${c.location}</p>
         <p><strong>Contact Number:</strong> ${c.contactNumber}</p>
         <p><strong>Status:</strong> ${c.status}</p>
